@@ -2,6 +2,6 @@ node_modules
 tsconfig.tsbuildinfo
 biome.json
 src
-package-lock.json
+bun.lockb
 tsconfig.json
 .github
