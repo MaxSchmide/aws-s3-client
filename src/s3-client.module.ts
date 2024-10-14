@@ -4,13 +4,7 @@ import { ZodOptionsSchema } from './schema'
 
 @Module({})
 export class S3ClientModule {
-  private static validateOptions(options: Options): Options {
-    return ZodOptionsSchema.parse(options)
-  }
-
   static forRootAsync(options: Options): DynamicModule {
-    S3ClientModule.validateOptions(options)
-
     return {
       module: S3ClientModule,
       providers: [
@@ -21,6 +15,8 @@ export class S3ClientModule {
         {
           provide: S3ClientService,
           useFactory: async (options) => {
+            await ZodOptionsSchema.parse(options)
+
             return new S3ClientService(options)
           },
           inject: ['OPTIONS'],
