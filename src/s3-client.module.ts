@@ -14,8 +14,8 @@ export class S3ClientModule {
         },
         {
           provide: S3ClientService,
-          useFactory: async (options) => {
-            await ZodOptionsSchema.parse(options)
+          useFactory: (options) => {
+            ZodOptionsSchema.parse(options)
 
             return new S3ClientService(options)
           },
