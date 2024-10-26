@@ -1,25 +1,20 @@
 import { type DynamicModule, Module } from '@nestjs/common'
-import { Options, S3ClientService } from './s3-client.service'
-import { ZodOptionsSchema } from './schema'
+import { S3ClientService } from './s3-client.service'
+import { DefaultOptions } from './types'
 
 @Module({})
 export class S3ClientModule {
-  static forRootAsync(options: Options): DynamicModule {
+  static forRootAsync<TOptions extends DefaultOptions>(
+    options: TOptions,
+  ): DynamicModule {
     return {
       module: S3ClientModule,
       providers: [
         {
-          provide: 'OPTIONS',
-          useValue: options,
-        },
-        {
-          provide: S3ClientService,
-          useFactory: (options) => {
-            ZodOptionsSchema.parse(options)
-
+          provide: S3ClientService<TOptions>,
+          useFactory: () => {
             return new S3ClientService(options)
           },
-          inject: ['OPTIONS'],
         },
       ],
       exports: [S3ClientService],

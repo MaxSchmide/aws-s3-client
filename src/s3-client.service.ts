@@ -9,88 +9,71 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { Injectable } from '@nestjs/common'
-
-export type Options = {
-  region: string
-  accessKeyId: string
-  secretAccessKey: string
-}
-
-type DeleteArgs = {
-  Bucket: string
-  Key: string
-}
-
-type GetArgs = {
-  Bucket: string
-  Key: string
-}
-
-type SendArgs = DeleteArgs & {
-  Body: Buffer
-  ContentType?: string
-}
-
-type SignedUrlArgs = DeleteArgs & {
-  expiresIn?: number
-}
+import { DefaultArgs, DefaultOptions, SendArgs, SignedUrlArgs } from './types'
 
 @Injectable()
-export class S3ClientService {
+export class S3ClientService<TOptions extends DefaultOptions> {
   private readonly s3Client: S3Client
+  private readonly defaultBucket?: string
 
-  constructor({ region, accessKeyId, secretAccessKey }: Options) {
+  constructor({ region, credentials, defaultBucket }: TOptions) {
     this.s3Client = new S3Client({
       region,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
+      credentials,
     })
+    this.defaultBucket = defaultBucket
   }
 
   send = ({
-    Bucket,
-    Key,
-    Body,
-    ContentType,
+    bucket,
+    buffer,
+    filepath,
+    contentType,
   }: SendArgs): Promise<PutObjectCommandOutput> => {
     return this.s3Client.send(
       new PutObjectCommand({
-        Bucket,
-        Key,
-        Body,
-        ContentType,
+        Bucket: bucket ?? this.defaultBucket,
+        Key: filepath,
+        Body: buffer,
+        ContentType: contentType,
       }),
     )
   }
 
   delete = ({
-    Bucket,
-    Key,
-  }: DeleteArgs): Promise<DeleteObjectCommandOutput> => {
+    bucket,
+    filepath,
+  }: DefaultArgs): Promise<DeleteObjectCommandOutput> => {
     return this.s3Client.send(
       new DeleteObjectCommand({
-        Bucket,
-        Key,
+        Bucket: bucket ?? this.defaultBucket,
+        Key: filepath,
       }),
     )
   }
 
-  get = async ({ Bucket, Key }: GetArgs): Promise<GetObjectCommandOutput> => {
-    return this.s3Client.send(new GetObjectCommand({ Bucket, Key }))
+  get = async ({
+    bucket,
+    filepath,
+  }: DefaultArgs): Promise<GetObjectCommandOutput> => {
+    return this.s3Client.send(
+      new GetObjectCommand({
+        Bucket: bucket ?? this.defaultBucket,
+        Key: filepath,
+      }),
+    )
   }
 
   signedUrl = ({
-    Bucket,
-    Key,
+    bucket,
+    filepath,
     expiresIn = 300,
   }: SignedUrlArgs): Promise<string> => {
     return getSignedUrl(
       this.s3Client,
       new GetObjectCommand({
-        Bucket,
-        Key,
+        Bucket: bucket ?? this.defaultBucket,
+        Key: filepath,
       }),
       { expiresIn },
     )

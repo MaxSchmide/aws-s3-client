@@ -13,22 +13,22 @@
   },
   "homepage": "https://github.com/MaxSchmide/aws-s3-client#readme",
   "scripts": {
-    "build": "rm -rf ./dist && tsc"
+    "build": "rm -rf ./dist && tsc",
+    "bump": "bunx npm-check-updates -u --deep -p bun && bun i && bun update"
   },
   "keywords": [
     "AWS",
     "S3"
   ],
-  "dependencies": {
+  "peerDependencies": {
     "@aws-sdk/client-s3": "^3.670.0",
     "@aws-sdk/s3-request-presigner": "^3.670.0",
-    "@nestjs/common": "^10.4.4",
-    "zod": "^3.23.8"
+    "@nestjs/common": "^10.4.4"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@biomejs/biome": "^1.8.3",
-    "@types/node": "^20.14.10",
-    "typescript": "^5.5.3"
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.8.1",
+    "typescript": "^5.6.3"
   }
 }
